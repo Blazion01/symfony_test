@@ -25,20 +25,35 @@ class AdminController extends AbstractController
     private $blogPostRepository;
     
     /**
-     * @param EntityManagerInterface $entityManager
+     * @Route("/admin/author/create", name="author_create")
      */
-    public function __construct(EntityManagerInterface $entityManager)
+    public function createAuthorAction(Request $request)
     {
-        $this->entityManager = $entityManager;
-        $this->blogPostRepository = $entityManager->getRepository('App:BlogPost');
-        $this->authorRepository = $entityManager->getRepository('App:Author');
-    }
-
-    #[Route('/admin', name: 'admin')]
-    public function index(): Response
-    {
-        return $this->render('admin/index.html.twig', [
-            'controller_name' => 'AdminController',
+        if ($this->authorRepository->findOneByUsername($this->getUser()->getUserName())) {
+            // Redirect to dashboard.
+            $this->addFlash('error', 'Unable to create author, author already exists!');
+        
+            return $this->redirectToRoute('homepage');
+        }
+    
+        $author = new Author();
+        $author->setUsername($this->getUser()->getUserName());
+    
+        $form = $this->createForm(AuthorFormType::class, $author);
+        $form->handleRequest($request);
+    
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->entityManager->persist($author);
+            $this->entityManager->flush($author);
+        
+            $request->getSession()->set('user_is_author', true);
+            $this->addFlash('success', 'Congratulations! You are now an author.');
+        
+            return $this->redirectToRoute('homepage');
+        }
+    
+        return $this->render('admin/create_author.html.twig', [
+            'form' => $form->createView()
         ]);
     }
 }
