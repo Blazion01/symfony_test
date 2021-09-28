@@ -44,7 +44,7 @@ class BlogPost
     private $author;
 
     /**
-     * @ORM\Column(type="datetimetz")
+     * @ORM\Column(type="datetimetz_immutable")
      */
     private $createdAt;
 
