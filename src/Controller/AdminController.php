@@ -4,17 +4,16 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+//use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
+use App\Entity\Author;
+use App\Form\AuthorFormType;
 
 class AdminController extends AbstractController
 {
-    use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-    use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-    use Doctrine\ORM\EntityManagerInterface;
-    use Symfony\Component\HttpFoundation\Request;
-    use App\Entity\Author;
-    use App\Form\AuthorFormType;
-
     /** @var EntityManagerInterface */
     private $entityManager;
     
@@ -32,26 +31,26 @@ class AdminController extends AbstractController
         if ($this->authorRepository->findOneByUsername($this->getUser()->getUserName())) {
             // Redirect to dashboard.
             $this->addFlash('error', 'Unable to create author, author already exists!');
-        
+
             return $this->redirectToRoute('homepage');
         }
-    
+
         $author = new Author();
         $author->setUsername($this->getUser()->getUserName());
-    
+
         $form = $this->createForm(AuthorFormType::class, $author);
         $form->handleRequest($request);
-    
+
         if ($form->isSubmitted() && $form->isValid()) {
             $this->entityManager->persist($author);
             $this->entityManager->flush($author);
-        
+
             $request->getSession()->set('user_is_author', true);
             $this->addFlash('success', 'Congratulations! You are now an author.');
-        
+
             return $this->redirectToRoute('homepage');
         }
-    
+
         return $this->render('admin/create_author.html.twig', [
             'form' => $form->createView()
         ]);
