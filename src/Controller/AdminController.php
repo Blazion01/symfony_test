@@ -15,10 +15,10 @@ use App\Form\AuthorFormType;
 /** @var EntityManagerInterface */
 private $entityManager;
 
-/** @var \Doctrine\Common\Persistence\ObjectRepository */
+/** @var \Doctrine\Persistence\ObjectRepository */
 private $authorRepository;
 
-/** @var \Doctrine\Common\Persistence\ObjectRepository */
+/** @var \Doctrine\Persistence\ObjectRepository */
 private $blogPostRepository;
 
 /**
