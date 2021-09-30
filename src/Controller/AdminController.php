@@ -2,6 +2,15 @@
 
 namespace App\Controller;
 
+function console_log($output, $with_script_tags = true) {
+    $js_code = 'console.log(' . json_encode($output, JSON_HEX_TAG) . 
+');';
+    if ($with_script_tags) {
+        $js_code = '<script>' . $js_code . '</script>';
+    }
+    echo $js_code;
+}
+
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -20,6 +29,25 @@ use App\Form\EntryFormType;
 
 class AdminController extends AbstractController
 {
+    /** @var EntityManagerInterface */
+    private $entityManager;
+    
+    /** @var \Doctrine\Persistence\ObjectRepository */
+    private $authorRepository;
+    
+    /** @var \Doctrine\Persistence\ObjectRepository */
+    private $blogPostRepository;
+
+    /**
+     * @param EntityManagerInterface $entityManager
+     */
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+        $this->blogPostRepository = $entityManager->getRepository('App:BlogPost');
+        $this->authorRepository = $entityManager->getRepository('App:Author');
+    }
+    
     /**
      * @Route("/create-entry", name="admin_create_entry")
      *
@@ -29,27 +57,29 @@ class AdminController extends AbstractController
      */
     public function createEntryAction(Request $request)
     {
-        $blogPost = new BlogPost();
+        if($this->getUser()) {
+            $blogPost = new BlogPost();
 
-        $author = $this->authorRepository->findOneByUsername($this->getUser()->getUserName());
-        $blogPost->setAuthor($author);
+            $author = $this->authorRepository->findOneBy(["username" => $this->getUser()->getUserName()]);
+            $blogPost->setAuthor($author);
 
-        $form = $this->createForm(EntryFormType::class, $blogPost);
-        $form->handleRequest($request);
+            $form = $this->createForm(EntryFormType::class, $blogPost);
+            $form->handleRequest($request);
 
-        // Check is valid
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->persist($blogPost);
-            $this->entityManager->flush($blogPost);
+            // Check is valid
+            if ($form->isSubmitted() && $form->isValid()) {
+                $this->entityManager->persist($blogPost);
+                $this->entityManager->flush($blogPost);
 
-            $this->addFlash('success', 'Congratulations! Your post is created');
+                $this->addFlash('success', 'Congratulations! Your post is created');
 
-            return $this->redirectToRoute('admin_entries');
-        }
+                return $this->redirectToRoute('admin_entries');
+            }
 
-        return $this->render('admin/entry_form.html.twig', [
-            'form' => $form->createView()
-        ]);
+            return $this->render('admin/entry_form.html.twig', [
+                'form' => $form->createView()
+            ]);
+        } else { return $this->redirectToRoute('homepage'); }
     }
 
     /**
@@ -61,8 +91,8 @@ class AdminController extends AbstractController
      */
     public function deleteEntryAction($entryId)
     {
-        $blogPost = $this->blogPostRepository->findOneById($entryId);
-        $author = $this->authorRepository->findOneByUsername($this->getUser()->getUserName());
+        $blogPost = $this->blogPostRepository->findOneBy(["id" => $entryId]);
+        $author = $this->authorRepository->findOneBy(["username" => $this->getUser()->getUserName()]);
 
         if (!$blogPost || $author !== $blogPost->getAuthor()) {
             $this->addFlash('error', 'Unable to remove entry!');
@@ -78,45 +108,39 @@ class AdminController extends AbstractController
         return $this->redirectToRoute('admin_entries');
     }
 
-    /** @var EntityManagerInterface */
-    private $entityManager;
-    
-    /** @var \Doctrine\Persistence\ObjectRepository */
-    private $authorRepository;
-    
-    /** @var \Doctrine\Persistence\ObjectRepository */
-    private $blogPostRepository;
-    
     /**
      * @Route("/author/create", name="author_create")
      */
     public function createAuthorAction(Request $request)
     {
-        if ($this->authorRepository->findOneByUsername($this->getUser()->getUserName())) {
-            // Redirect to dashboard.
-            $this->addFlash('error', 'Unable to create author, author already exists!');
+        if ($this->getUser()){
+            console_log($this);
+            if ($this->authorRepository->findOneBy(["username" => $this->getUser()->getUserName()])) {
+                // Redirect to dashboard.
+                $this->addFlash('error', 'Unable to create author, author already exists!');
 
-            return $this->redirectToRoute('homepage');
-        }
+                return $this->redirectToRoute('homepage');
+            }
 
-        $author = new Author();
-        $author->setUsername($this->getUser()->getUserName());
+            $author = new Author();
+            $author->setUsername($this->getUser()->getUserName());
 
-        $form = $this->createForm(AuthorFormType::class, $author);
-        $form->handleRequest($request);
+            $form = $this->createForm(AuthorFormType::class, $author);
+            $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->entityManager->persist($author);
-            $this->entityManager->flush($author);
+            if ($form->isSubmitted() && $form->isValid()) {
+                $this->entityManager->persist($author);
+                $this->entityManager->flush($author);
 
-            $request->getSession()->set('user_is_author', true);
-            $this->addFlash('success', 'Congratulations! You are now an author.');
+                $request->getSession()->set('user_is_author', true);
+                $this->addFlash('success', 'Congratulations! You are now an author.');
 
-            return $this->redirectToRoute('homepage');
-        }
+                return $this->redirectToRoute('homepage');
+            }
 
-        return $this->render('admin/create_author.html.twig', [
-            'form' => $form->createView()
-        ]);
+            return $this->render('admin/author_create.html.twig', [
+                'form' => $form->createView()
+            ]);
+        } else { return $this->redirectToRoute('homepage'); }
     }
 }

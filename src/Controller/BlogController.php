@@ -2,15 +2,6 @@
 
 namespace App\Controller;
 
-function console_log($output, $with_script_tags = true) {
-    $js_code = 'console.log(' . json_encode($output, JSON_HEX_TAG) . 
-');';
-    if ($with_script_tags) {
-        $js_code = '<script>' . $js_code . '</script>';
-    }
-    echo $js_code;
-}
-
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -44,6 +35,22 @@ class BlogController extends AbstractController
     }
 
     /**
+     * @Route("/", name="homepage")
+     * @Route("/entries", name="entries")
+     */
+    public function indexAction(): Response
+    {
+        $page = 1;
+
+        return $this->render('blog/entries.html.twig', [
+            'blogPosts' => $this->blogPostRepository->findAll(),
+            'totalBlogPosts' => $this->blogPostRepository->getPostCount(),
+            'page' => $page,
+            'entryLimit' => self::POST_LIMIT
+        ]);
+    }
+
+    /**
      * @Route("/", name="admin_index")
      * @Route("/entries", name="admin_entries")
      *
@@ -59,7 +66,7 @@ class BlogController extends AbstractController
 
         $author = null;
         if($this->getUser() != null) {
-            $author = $this->authorRepository->findOneBy($this->getUser()->getUserName());
+            $author = $this->authorRepository->findOneBy(["username" => $this->getUser()->getUserName()]);
         }
 
         $blogPosts = [];
@@ -89,20 +96,6 @@ class BlogController extends AbstractController
         return $this->render('blog/entry.html.twig', array(
             'blogPost' => $blogPost
         ));
-    }
-
-    /**
-     * @Route("/", name="homepage")
-     * @Route("/entries", name="entries")
-     */
-    public function indexAction(): Response
-    {
-        return $this->render('blog/entries.html.twig', [
-            'blogPosts' => $this->blogPostRepository->findAll(),
-            'totalBlogPosts' => $this->blogPostRepository->getPostCount(),
-            'page' => $page,
-            'entryLimit' => self::POST_LIMIT
-        ]);
     }
 
     /**

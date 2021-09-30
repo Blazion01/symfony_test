@@ -74,7 +74,7 @@ class CheckIsAuthorListener
         // Check if authenticated user has an author associated with them.
         if ($author = $this->entityManager
             ->getRepository('App:Author')
-            ->findOneByUsername($user->getUsername())
+            ->findOneBy(["username" => $user])
         ) {
             $this->session->set('user_is_author', true);
         }
