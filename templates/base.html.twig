@@ -9,7 +9,7 @@
     {% endblock %}
 </head>
 <body>
-<include src="'navBar".twig'/>
+{% block nav %}{% endblock %}
 {% block body %}{% endblock %}
 {% block javascripts %}
     <script src="{{ asset('build/app.js') }}"></script>

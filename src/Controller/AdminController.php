@@ -114,7 +114,7 @@ class AdminController extends AbstractController
     public function createAuthorAction(Request $request)
     {
         if ($this->getUser()){
-            console_log($this);
+        //    console_log($this);
             if ($this->authorRepository->findOneBy(["username" => $this->getUser()->getUserName()])) {
                 // Redirect to dashboard.
                 $this->addFlash('error', 'Unable to create author, author already exists!');

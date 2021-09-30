@@ -1,11 +1,11 @@
 {% extends 'base.html.twig' %}
 
-{% block body %}
+{% block nav %}
     <nav class="navbar navbar-default navbar-static-top">
         <div id="navbar" class="collapse navbar-collapse pull-right">
             <ul class="nav navbar-nav">
                 <AmpContent>
-                    <li><a href="{{ path("author_create") }}">Admin</a></li>
+                    <li><a href="{{ path("admin_entries") }}">Admin</a></li>
                     <li><a href="{{ logout_url("secured_area") }}">Logout</a></li>
                 
 </AmpContent>
