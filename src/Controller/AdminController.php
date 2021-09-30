@@ -4,9 +4,9 @@ namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-//use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+//use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use App\Entity\Author;
@@ -15,7 +15,7 @@ use App\Entity\BlogPost;
 use App\Form\EntryFormType;
 
 /**
- * @Route("/admin)
+ * @Route("/admin")
  */
 
 class AdminController extends AbstractController
@@ -53,24 +53,29 @@ class AdminController extends AbstractController
     }
 
     /**
-     * @Route("/", name="admin_index")
-     * @Route("/entries", name="admin_entries")
+     * @Route("/delete-entry/{entryId}", name="admin_delete_entry")
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @param $entryId
+     *
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
      */
-    public function entriesAction()
+    public function deleteEntryAction($entryId)
     {
+        $blogPost = $this->blogPostRepository->findOneById($entryId);
         $author = $this->authorRepository->findOneByUsername($this->getUser()->getUserName());
 
-        $blogPosts = [];
+        if (!$blogPost || $author !== $blogPost->getAuthor()) {
+            $this->addFlash('error', 'Unable to remove entry!');
 
-        if ($author) {
-            $blogPosts = $this->blogPostRepository->findByAuthor($author);
+            return $this->redirectToRoute('admin_entries');
         }
 
-        return $this->render('admin/entries.html.twig', [
-            'blogPosts' => $blogPosts
-        ]);
+        $this->entityManager->remove($blogPost);
+        $this->entityManager->flush();
+
+        $this->addFlash('success', 'Entry was deleted!');
+
+        return $this->redirectToRoute('admin_entries');
     }
 
     /** @var EntityManagerInterface */

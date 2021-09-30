@@ -44,12 +44,12 @@ class BlogPost
     private $author;
 
     /**
-     * @ORM\Column(type="datetimetz", nullable="true")
+     * @ORM\Column(type="datetime")
      */
     private $createdAt;
 
     /**
-     * @ORM\Column(type="datetime", nullable="true")
+     * @ORM\Column(type="datetime")
      */
     private $updatedAt;
 
