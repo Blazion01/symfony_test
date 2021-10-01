@@ -67,7 +67,7 @@ class CheckIsAuthorListener
                     return;
                 }
             }
-        } else {return;}
+        }
 
         // Use the session to exit this listener early, if the relevant checks have already been made
         if (true === $this->session->get('user_is_author')) {

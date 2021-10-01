@@ -13,7 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 class BlogController extends AbstractController
 {
     /** @var integer */
-    const POST_LIMIT = 5;
+    const POST_LIMIT = 5 ;
 
     /** @var EntityManagerInterface */
     private $entityManager;

@@ -146,12 +146,7 @@ class AdminController extends AbstractController
     public function createAuthorAction(Request $request)
     {
         if ($this->getUser()){
-            if (!$this->authorRepository->findOneBy(["username" => $this->getUser()->getUserName()])) {
-                // Redirect to dashboard.
-                $this->addFlash('error', 'Unable to create author, author already exists!');
-
-                return $this->redirectToRoute('homepage');
-            } else {
+            if ($this->authorRepository->findOneBy(["username" => $this->getUser()->getUserName()])) {
                 return $this->redirectToRoute('admin_entries');
             }
 
@@ -168,7 +163,7 @@ class AdminController extends AbstractController
                 $request->getSession()->set('user_is_author', true);
                 $this->addFlash('success', 'Congratulations! You are now an author.');
 
-                return $this->redirectToRoute('homepage');
+                return $this->redirectToRoute('admin_entries');
             }
 
             return $this->render('admin/author_create.html.twig', [
