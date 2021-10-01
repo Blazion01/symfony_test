@@ -40,43 +40,18 @@ class BlogController extends AbstractController
      */
     public function indexAction(): Response
     {
+        //if ($this->getUser() !== null) {
+        //    echo "<pre>";
+        //    var_dump($this->getUser()->getUserName());
+        //    echo "</pre>";
+        //}
         $page = 1;
-
         return $this->render('blog/entries.html.twig', [
             'blogPosts' => $this->blogPostRepository->findAll(),
             'totalBlogPosts' => $this->blogPostRepository->getPostCount(),
             'page' => $page,
-            'entryLimit' => self::POST_LIMIT
-        ]);
-    }
-
-    /**
-     * @Route("/", name="admin_index")
-     * @Route("/entries", name="admin_entries")
-     *
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function entriesAction(Request $request)
-    {
-        $page = 1;
-
-        if($request->get('page')) {
-            $page = $request->get('page');
-        }
-
-        $author = null;
-        if($this->getUser() != null) {
-            $author = $this->authorRepository->findOneBy(["username" => $this->getUser()->getUserName()]);
-        }
-
-        $blogPosts = [];
-
-        if($author) {
-            $blogPosts = $this->blogPostRepository->findByAuthor($author);
-        }
-
-        return $this->render('admin/entries.html.twig', [
-            'blogPosts' => $blogPosts
+            'entryLimit' => self::POST_LIMIT,
+            'user' => $this->getUser()
         ]);
     }
 

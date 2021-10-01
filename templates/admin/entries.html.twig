@@ -1,4 +1,4 @@
-{% extends 'base.html.twig' %}
+{% extends 'admin/index.html.twig' %}
 {% block title %}{% endblock %}
 {% block body %}
     <div class="container">
@@ -40,10 +40,13 @@
 
 <NonAmpContent>
 
-                        <tr>
-                            <td colspan="5">No entries available</td>
-                        </tr>
+                        
                     {% endfor %}
+                    {% if blogPosts == null %}
+                    <tr>
+                        <td colspan="5">No entries available</td>
+                    </tr>
+                    {% endif %}
                 </table>
             </div>
         </div>

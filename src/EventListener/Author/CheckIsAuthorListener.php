@@ -55,9 +55,19 @@ class CheckIsAuthorListener
             return;
         }
 
-        if (null === $user = $this->tokenStorage->getToken()->getUser()) {
-            return;
-        }
+        //console_log($this->tokenStorage->getToken()->getUser()->getUserName());
+
+        if (null !== $this->tokenStorage->getToken()) {
+            if(is_string($this->tokenStorage->getToken()->getUser())) {
+                if (null === $user = $this->tokenStorage->getToken()->getUser()) {
+                    return;
+                }
+            } elseif (is_string($this->tokenStorage->getToken()->getUser()->getUserName())) {
+                if (null === $user = $this->tokenStorage->getToken()->getUser()->getUserName()) {
+                    return;
+                }
+            }
+        } else {return;}
 
         // Use the session to exit this listener early, if the relevant checks have already been made
         if (true === $this->session->get('user_is_author')) {
@@ -86,7 +96,7 @@ class CheckIsAuthorListener
             );
 
             $route = $this->router->generate('homepage');
-        } else {
+        } elseif (false === $this->session->get('user_is_author')) {
             $this->session->getFlashBag()->add(
                 'warning',
                 'You cannot access the author section until you become an author. Please complete the form below to proceed.'

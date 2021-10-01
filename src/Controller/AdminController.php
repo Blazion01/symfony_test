@@ -2,15 +2,6 @@
 
 namespace App\Controller;
 
-function console_log($output, $with_script_tags = true) {
-    $js_code = 'console.log(' . json_encode($output, JSON_HEX_TAG) . 
-');';
-    if ($with_script_tags) {
-        $js_code = '<script>' . $js_code . '</script>';
-    }
-    echo $js_code;
-}
-
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -46,6 +37,47 @@ class AdminController extends AbstractController
         $this->entityManager = $entityManager;
         $this->blogPostRepository = $entityManager->getRepository('App:BlogPost');
         $this->authorRepository = $entityManager->getRepository('App:Author');
+    }
+
+    public function __toString() {
+        return $this->getUser()->getUserName();
+    }
+
+    /**
+     * @Route("/", name="admin_index")
+     * @Route("/entries", name="admin_entries")
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function entriesAction(Request $request)
+    {
+        //if ($this->getUser() !== null) {
+        //    echo "<pre>";
+        //    var_dump($this->getUser()->getUserName());
+        //    echo "</pre>";
+        //};
+        if($this->getUser() != null) {
+            $page = 1;
+
+            if($request->get('page')) {
+                $page = $request->get('page');
+            }
+
+            $author = null;
+            if($this->getUser() != null) {
+                $author = $this->authorRepository->findOneBy(["username" => $this->getUser()->getUserName()]);
+            }
+
+            $blogPosts = [];
+
+            if($author) {
+                $blogPosts = $this->blogPostRepository->findByAuthor($author);
+            }
+
+            return $this->render('admin/entries.html.twig', [
+                'blogPosts' => $blogPosts
+            ]);
+        } else { return $this->redirectToRoute('author_create'); }
     }
     
     /**
@@ -114,12 +146,13 @@ class AdminController extends AbstractController
     public function createAuthorAction(Request $request)
     {
         if ($this->getUser()){
-        //    console_log($this);
-            if ($this->authorRepository->findOneBy(["username" => $this->getUser()->getUserName()])) {
+            if (!$this->authorRepository->findOneBy(["username" => $this->getUser()->getUserName()])) {
                 // Redirect to dashboard.
                 $this->addFlash('error', 'Unable to create author, author already exists!');
 
                 return $this->redirectToRoute('homepage');
+            } else {
+                return $this->redirectToRoute('admin_entries');
             }
 
             $author = new Author();
