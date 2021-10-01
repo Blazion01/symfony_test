@@ -15,6 +15,7 @@
     {% endif %}
     <div class="row">
         <div class="col-sm-8 blog-main">
+            {% set entries = 0 %}
             {% for blogPost in blogPosts %}
                 {% set paragraphs = blogPost.description|split('</p>') %}
                 {% set firstParagraph = paragraphs|first ~ '</p>' %}
