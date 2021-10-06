@@ -40,17 +40,21 @@ class BlogController extends AbstractController
      */
     public function indexAction(): Response
     {
-        //if ($this->getUser() !== null) {
-        //    echo "<pre>";
-        //    var_dump($this->getUser()->getUserName());
-        //    echo "</pre>";
-        //}
-        $page = 1;
+        $blogPosts = $this->blogPostRepository->findAll();
+        $totalBlogPosts =$this->blogPostRepository->getPostCount();
+        $entryLimit = self::POST_LIMIT;
+        if(isset($_GET['page'])) {
+            $page = $_GET['page'];
+        } else {$page = 1;}
+        $lastPage = floor($totalBlogPosts / $entryLimit) + 1;
+
         return $this->render('blog/entries.html.twig', [
-            'blogPosts' => $this->blogPostRepository->findAll(),
-            'totalBlogPosts' => $this->blogPostRepository->getPostCount(),
+            'blogPosts' => $blogPosts,
+            'totalBlogPosts' => $totalBlogPosts,
             'page' => $page,
-            'entryLimit' => self::POST_LIMIT,
+            'lastPage' => $lastPage,
+            'entries' => ($page - 1) * $entryLimit,
+            'entryLimit' => $entryLimit,
             'user' => $this->getUser()
         ]);
     }

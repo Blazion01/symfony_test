@@ -63,7 +63,7 @@ class BlogPostRepository extends ServiceEntityRepository
             ->from('App:BlogPost', 'bp')
             ->orderBy('bp.id', 'DESC')
             ->setFirstResult($limit * ($page - 1))
-            ->setMaxResults($limit);
+            ->setMaxResults($limit * $page);
 
         return $queryBuilder->getQuery()->getResult();
     }

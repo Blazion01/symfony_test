@@ -15,9 +15,10 @@
     {% endif %}
     <div class="row">
         <div class="col-sm-8 blog-main">
-            {% set entries = 0 %}
             {% for blogPost in blogPosts %}
-            {% if entries < 5 %}
+            {% if entries < totalBlogPosts %}
+            {% if entries < (page * entryLimit) %}
+            {% set blogPost = blogPosts[entries] %}
                 {% set paragraphs = blogPost.description|split('</p>') %}
                 {% set firstParagraph = paragraphs|first ~ '</p>' %}
                 <div class="blog-post">
@@ -49,22 +50,21 @@
 <NonAmpContent>
                 {% set entries = entries + 1 %}
             {% endif %}
+            {% endif %}
             {% endfor %}
             {% set canPrevious = page > 1 %}
-            {% set canNext = (page * entryLimit) < totalBlogPosts %}
+            {% set canNext = page < lastPage %}
             <nav>
                 <ul class="pager">
                     <li class="previous <AmpContent>disabled
 </NonAmpContent>">
-                        <a href="<AmpContent>{{ path('entries', {'page': page - 1}) }}
-</NonAmpContent>">
+                        <a href="{{ path('entries', {'page': page - 1}) }}">
                             <span aria-hidden="true">&larr;</span> Older
                         </a>
                     </li>
                     <li class="next <AmpContent>disabled
 </NonAmpContent>">
-                        <a href="<AmpContent>{{ path('entries', {'page': page + 1}) }}
-</NonAmpContent>">
+                        <a href="{{ path('entries', {'page': page + 1}) }}">
                             Newer <span aria-hidden="true">&rarr;</span>
                         </a>
                     </li>
