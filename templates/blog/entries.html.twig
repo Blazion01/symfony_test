@@ -17,6 +17,7 @@
         <div class="col-sm-8 blog-main">
             {% set entries = 0 %}
             {% for blogPost in blogPosts %}
+            {% while entries < 5 %}
                 {% set paragraphs = blogPost.description|split('</p>') %}
                 {% set firstParagraph = paragraphs|first ~ '</p>' %}
                 <div class="blog-post">
@@ -46,6 +47,7 @@
 </AmpContent>
 
 <NonAmpContent>
+            {% endwhile %}
             {% endfor %}
             {% set canPrevious = page > 1 %}
             {% set canNext = (page * entryLimit) < totalBlogPosts %}
